@@ -1,3 +1,4 @@
+// Package main provides a sample program for the clog package.
 package main
 
 import (

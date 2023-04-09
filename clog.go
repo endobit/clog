@@ -1,3 +1,4 @@
+// Package clog provides a slog Handler that mimics the output of the zerolog.Logger.
 package clog
 
 import (
@@ -11,6 +12,7 @@ import (
 	"golang.org/x/exp/slog"
 )
 
+// Handler implements an slog.Handler.
 type Handler struct {
 	mutex      sync.Mutex
 	opts       HandlerOptions
@@ -21,13 +23,16 @@ type Handler struct {
 	groups     []string
 }
 
+// HandlerOptions is a set of options for a Handler.
 type HandlerOptions slog.HandlerOptions
 
+// FormatOptions is a set of options for formatting log messages.
 type FormatOptions struct {
 	Time  string
 	Level map[slog.Level]string
 }
 
+// ColorOptions is a set of options for colorizing the output of a Handler.
 type ColorOptions struct {
 	NoColor func() bool
 	Time    Color
