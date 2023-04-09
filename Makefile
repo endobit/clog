@@ -1,4 +1,5 @@
-RULESDIR := ../build
-RULES := go
-
-include $(RULESDIR)/rules.mk
+BUILDER=./.builder
+RULES=go
+include $(BUILDER)/rules.mk
+$(BUILDER)/rules.mk:
+	-go run github.com/endobit/builder@latest init
