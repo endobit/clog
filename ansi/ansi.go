@@ -1,4 +1,5 @@
-// Package ansi provides ANSI escape codes for colorizing text.
+// Package ansi provides ANSI escape codes for setting the foreground color of
+// text.
 package ansi
 
 import (
@@ -48,26 +49,26 @@ type (
 	nopWrapper   struct{}
 )
 
-var (
-	_ Colorer = colorWrapper{} // colorWrapper implements Colorer.
-	_ Colorer = nopWrapper{}   // nopWrapper implements Colorer.
-
-	// Colorable is a function that returns true if the Colorer should apply ansi color codes.
-	Colorable = colorable
-)
+// Colorable is a function that returns true if the Colorer should apply ANSI
+// color codes.
+var Colorable = colorable
 
 // NewColorer returns a Colorer based on the Colorable function.
 func NewColorer() Colorer {
 	if Colorable() {
 		return colorWrapper{}
 	}
+
 	return nopWrapper{}
 }
 
+// Color implements the Colorer interface for c.
 func (c colorWrapper) Color(s interface{}, color Color) string {
 	return fmt.Sprintf("\x1b[%dm%v\x1b[0m", color, s)
 }
 
+// Color implements the Colorer interface for n. It always returns
+// the raw string with no color applied.
 func (n nopWrapper) Color(s interface{}, _ Color) string {
 	return fmt.Sprintf("%v", s)
 }
