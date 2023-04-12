@@ -1,4 +1,4 @@
-module clog
+module github.com/endobit/clog
 
 go 1.20
 
