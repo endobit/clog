@@ -2,11 +2,12 @@
 package main
 
 import (
-	"clog"
 	"net"
 	"os"
 
 	"golang.org/x/exp/slog"
+
+	"github.com/endobit/clog"
 )
 
 func main() {

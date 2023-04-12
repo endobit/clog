@@ -2,7 +2,6 @@
 package clog
 
 import (
-	"clog/ansi"
 	"fmt"
 	"io"
 	"strconv"
@@ -10,6 +9,8 @@ import (
 	"time"
 
 	"golang.org/x/exp/slog"
+
+	"github.com/endobit/clog/ansi"
 )
 
 // HandlerOptions is a set of options for a Handler.

@@ -1,7 +1,6 @@
 package clog
 
 import (
-	"clog/ansi"
 	"fmt"
 	"io"
 	"path"
@@ -9,6 +8,8 @@ import (
 	"sync"
 
 	"golang.org/x/exp/slog"
+
+	"github.com/endobit/clog/ansi"
 )
 
 // Handler implements an slog.Handler.
