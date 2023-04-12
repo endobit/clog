@@ -2,7 +2,6 @@
 package clog
 
 import (
-	"clog/ansi"
 	"fmt"
 	"io"
 	"strconv"
@@ -10,6 +9,8 @@ import (
 	"time"
 
 	"golang.org/x/exp/slog"
+
+	"github.com/endobit/clog/ansi"
 )
 
 // HandlerOptions is a set of options for a Handler.
@@ -31,10 +32,10 @@ type ColorOptions struct {
 var defaultFormatOptions = FormatOptions{
 	Time: time.Kitchen,
 	Level: map[slog.Level]string{
-		slog.DebugLevel: "DBG",
-		slog.InfoLevel:  "INF",
-		slog.WarnLevel:  "WRN",
-		slog.ErrorLevel: "ERR",
+		slog.LevelDebug: "DBG",
+		slog.LevelInfo:  "INF",
+		slog.LevelWarn:  "WRN",
+		slog.LevelError: "ERR",
 	},
 }
 
@@ -42,10 +43,10 @@ var defaultColorOptions = ColorOptions{
 	Time:  ansi.Faint,
 	Field: ansi.Cyan,
 	Level: map[slog.Level]ansi.Color{
-		slog.DebugLevel: ansi.Yellow,
-		slog.InfoLevel:  ansi.Green,
-		slog.WarnLevel:  ansi.Red,
-		slog.ErrorLevel: ansi.BrightRed,
+		slog.LevelDebug: ansi.Yellow,
+		slog.LevelInfo:  ansi.Green,
+		slog.LevelWarn:  ansi.Red,
+		slog.LevelError: ansi.BrightRed,
 	},
 }
 
@@ -120,7 +121,7 @@ func (h *Handler) attrFmt(level slog.Level, attr slog.Attr) (key, val string) {
 
 	key = c.Color(key+"=", h.colorOpts.Field)
 
-	if level >= slog.ErrorLevel && attr.Key == "err" {
+	if level >= slog.LevelError && attr.Key == "err" {
 		val = c.Color(val, h.colorOpts.levelColor(level))
 	}
 
@@ -146,14 +147,14 @@ func (f FormatOptions) levelString(l slog.Level) string {
 	}
 
 	switch {
-	case l < slog.InfoLevel:
-		return str(slog.DebugLevel, l-slog.DebugLevel)
-	case l < slog.WarnLevel:
-		return str(slog.InfoLevel, l)
-	case l < slog.ErrorLevel:
-		return str(slog.WarnLevel, l-slog.WarnLevel)
+	case l < slog.LevelInfo:
+		return str(slog.LevelDebug, l-slog.LevelDebug)
+	case l < slog.LevelWarn:
+		return str(slog.LevelInfo, l)
+	case l < slog.LevelError:
+		return str(slog.LevelWarn, l-slog.LevelWarn)
 	default:
-		return str(slog.ErrorLevel, l-slog.ErrorLevel)
+		return str(slog.LevelError, l-slog.LevelError)
 	}
 }
 
@@ -163,13 +164,13 @@ func (c ColorOptions) levelColor(l slog.Level) ansi.Color {
 	}
 
 	switch {
-	case l < slog.InfoLevel:
-		return c.Level[slog.DebugLevel]
-	case l < slog.WarnLevel:
-		return c.Level[slog.InfoLevel]
-	case l < slog.ErrorLevel:
-		return c.Level[slog.WarnLevel]
+	case l < slog.LevelInfo:
+		return c.Level[slog.LevelDebug]
+	case l < slog.LevelWarn:
+		return c.Level[slog.LevelInfo]
+	case l < slog.LevelError:
+		return c.Level[slog.LevelWarn]
 	default:
-		return c.Level[slog.ErrorLevel]
+		return c.Level[slog.LevelError]
 	}
 }
