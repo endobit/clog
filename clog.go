@@ -2,26 +2,15 @@
 package clog
 
 import (
+	"clog/ansi"
 	"fmt"
 	"io"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"golang.org/x/exp/slog"
 )
-
-// Handler implements an slog.Handler.
-type Handler struct {
-	mutex      sync.Mutex
-	opts       HandlerOptions
-	colorOpts  ColorOptions
-	formatOpts FormatOptions
-	writer     io.Writer
-	attrs      []slog.Attr
-	groups     []string
-}
 
 // HandlerOptions is a set of options for a Handler.
 type HandlerOptions slog.HandlerOptions
@@ -34,10 +23,9 @@ type FormatOptions struct {
 
 // ColorOptions is a set of options for colorizing the output of a Handler.
 type ColorOptions struct {
-	NoColor func() bool
-	Time    Color
-	Field   Color
-	Level   map[slog.Level]Color
+	Time  ansi.Color
+	Field ansi.Color
+	Level map[slog.Level]ansi.Color
 }
 
 var defaultFormatOptions = FormatOptions{
@@ -51,14 +39,13 @@ var defaultFormatOptions = FormatOptions{
 }
 
 var defaultColorOptions = ColorOptions{
-	NoColor: noColor,
-	Time:    Faint,
-	Field:   Cyan,
-	Level: map[slog.Level]Color{
-		slog.DebugLevel: Yellow,
-		slog.InfoLevel:  Green,
-		slog.WarnLevel:  Red,
-		slog.ErrorLevel: BrightRed,
+	Time:  ansi.Faint,
+	Field: ansi.Cyan,
+	Level: map[slog.Level]ansi.Color{
+		slog.DebugLevel: ansi.Yellow,
+		slog.InfoLevel:  ansi.Green,
+		slog.WarnLevel:  ansi.Red,
+		slog.ErrorLevel: ansi.BrightRed,
 	},
 }
 
@@ -80,7 +67,7 @@ func WithFormat(f FormatOptions) func(*Handler) {
 
 // NewHandler returns a Handler the writes to w and invokes any option setting
 // functions.
-func (o HandlerOptions) NewHandler(w io.Writer, opts ...func(*Handler)) *Handler {
+func (o HandlerOptions) NewHandler(w io.Writer, opts ...func(*Handler)) slog.Handler {
 	h := Handler{
 		opts:       o,
 		colorOpts:  defaultColorOptions,
@@ -97,7 +84,7 @@ func (o HandlerOptions) NewHandler(w io.Writer, opts ...func(*Handler)) *Handler
 
 // NewHandler returns a Handler the writes to w and invokes any option setting
 // functions.
-func NewHandler(w io.Writer) *Handler {
+func NewHandler(w io.Writer) slog.Handler {
 	return (HandlerOptions{}).NewHandler(w)
 }
 
@@ -129,12 +116,12 @@ func (h *Handler) attrFmt(level slog.Level, attr slog.Attr) (key, val string) {
 		val = strconv.Quote(val)
 	}
 
-	c := colorer{NoColor: h.colorOpts.NoColor}
+	c := ansi.NewColorer()
 
-	key = c.color(key+"=", h.colorOpts.Field)
+	key = c.Color(key+"=", h.colorOpts.Field)
 
 	if level >= slog.ErrorLevel && attr.Key == "err" {
-		val = c.color(val, h.colorOpts.levelColor(level))
+		val = c.Color(val, h.colorOpts.levelColor(level))
 	}
 
 	return key, val
@@ -170,23 +157,19 @@ func (f FormatOptions) levelString(l slog.Level) string {
 	}
 }
 
-func (c ColorOptions) levelColor(l slog.Level) Color {
+func (c ColorOptions) levelColor(l slog.Level) ansi.Color {
 	if color, ok := c.Level[l]; ok {
 		return color // exact match
 	}
 
-	var color Color
-
 	switch {
 	case l < slog.InfoLevel:
-		color = c.Level[slog.DebugLevel]
+		return c.Level[slog.DebugLevel]
 	case l < slog.WarnLevel:
-		color = c.Level[slog.InfoLevel]
+		return c.Level[slog.InfoLevel]
 	case l < slog.ErrorLevel:
-		color = c.Level[slog.WarnLevel]
+		return c.Level[slog.WarnLevel]
 	default:
-		color = c.Level[slog.ErrorLevel]
+		return c.Level[slog.ErrorLevel]
 	}
-
-	return color
 }

@@ -1,12 +1,28 @@
 package clog
 
 import (
+	"clog/ansi"
 	"fmt"
+	"io"
 	"path"
 	"strings"
+	"sync"
 
 	"golang.org/x/exp/slog"
 )
+
+// Handler implements an slog.Handler.
+type Handler struct {
+	mutex      sync.Mutex
+	opts       HandlerOptions
+	colorOpts  ColorOptions
+	formatOpts FormatOptions
+	writer     io.Writer
+	attrs      []slog.Attr
+	groups     []string
+}
+
+var _ slog.Handler = new(Handler) // Handle implements the slog.Handler interface.
 
 // Enabled implements the slog.Handler interface.
 func (h *Handler) Enabled(l slog.Level) bool {
@@ -20,12 +36,12 @@ func (h *Handler) Enabled(l slog.Level) bool {
 
 // Handle implements the slog.Handler interface.
 func (h *Handler) Handle(r slog.Record) error {
-	c := colorer{NoColor: h.colorOpts.NoColor}
+	c := ansi.NewColorer()
 
 	message := new(strings.Builder)
 
-	fmt.Fprint(message, c.color(r.Time.Format(h.formatOpts.Time), h.colorOpts.Time),
-		" ", c.color(h.formatOpts.levelString(r.Level), h.colorOpts.levelColor(r.Level)),
+	fmt.Fprint(message, c.Color(r.Time.Format(h.formatOpts.Time), h.colorOpts.Time),
+		" ", c.Color(h.formatOpts.levelString(r.Level), h.colorOpts.levelColor(r.Level)),
 		" ", r.Message)
 
 	if h.opts.AddSource {
