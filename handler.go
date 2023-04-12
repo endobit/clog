@@ -1,9 +1,10 @@
 package clog
 
 import (
+	"context"
 	"fmt"
 	"io"
-	"path"
+	"runtime"
 	"strings"
 	"sync"
 
@@ -26,8 +27,8 @@ type Handler struct {
 var _ slog.Handler = new(Handler) // Handle implements the slog.Handler interface.
 
 // Enabled implements the slog.Handler interface.
-func (h *Handler) Enabled(l slog.Level) bool {
-	minLevel := slog.InfoLevel
+func (h *Handler) Enabled(_ context.Context, l slog.Level) bool {
+	minLevel := slog.LevelInfo
 	if h.opts.Level != nil {
 		minLevel = h.opts.Level.Level()
 	}
@@ -36,7 +37,7 @@ func (h *Handler) Enabled(l slog.Level) bool {
 }
 
 // Handle implements the slog.Handler interface.
-func (h *Handler) Handle(r slog.Record) error {
+func (h *Handler) Handle(_ context.Context, r slog.Record) error {
 	c := ansi.NewColorer()
 
 	message := new(strings.Builder)
@@ -46,11 +47,9 @@ func (h *Handler) Handle(r slog.Record) error {
 		" ", r.Message)
 
 	if h.opts.AddSource {
-		file, line := r.SourceLine()
-		if file != "" {
-			_, file = path.Split(file)
-			fmt.Fprint(message, " ", "[", file, ":", line, "]")
-		}
+		fs := runtime.CallersFrames([]uintptr{r.PC})
+		f, _ := fs.Next()
+		fmt.Fprint(message, " ", "[", f.File, ":", f.Line, "]")
 	}
 
 	for i := range h.attrs {
