@@ -24,9 +24,10 @@ type FormatOptions struct {
 
 // ColorOptions is a set of options for colorizing the output of a Handler.
 type ColorOptions struct {
-	Time  ansi.Color
-	Field ansi.Color
-	Level map[slog.Level]ansi.Color
+	Colorer ansi.Colorer
+	Time    ansi.Color
+	Field   ansi.Color
+	Level   map[slog.Level]ansi.Color
 }
 
 var defaultFormatOptions = FormatOptions{
@@ -40,8 +41,9 @@ var defaultFormatOptions = FormatOptions{
 }
 
 var defaultColorOptions = ColorOptions{
-	Time:  ansi.Faint,
-	Field: ansi.Cyan,
+	Colorer: ansi.NewColorer(),
+	Time:    ansi.Faint,
+	Field:   ansi.Cyan,
 	Level: map[slog.Level]ansi.Color{
 		slog.LevelDebug: ansi.Yellow,
 		slog.LevelInfo:  ansi.Green,
@@ -83,8 +85,7 @@ func (o HandlerOptions) NewHandler(w io.Writer, opts ...func(*Handler)) slog.Han
 	return &h
 }
 
-// NewHandler returns a Handler the writes to w and invokes any option setting
-// functions.
+// NewHandler returns a Handler with the default options that writes to w.
 func NewHandler(w io.Writer) slog.Handler {
 	return (HandlerOptions{}).NewHandler(w)
 }
@@ -117,7 +118,7 @@ func (h *Handler) attrFmt(level slog.Level, attr slog.Attr) (key, val string) {
 		val = strconv.Quote(val)
 	}
 
-	c := ansi.NewColorer()
+	c := h.colorOpts.Colorer
 
 	key = c.Color(key+"=", h.colorOpts.Field)
 

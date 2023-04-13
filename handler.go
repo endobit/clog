@@ -4,13 +4,12 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"path"
 	"runtime"
 	"strings"
 	"sync"
 
 	"golang.org/x/exp/slog"
-
-	"github.com/endobit/clog/ansi"
 )
 
 // Handler implements an slog.Handler.
@@ -38,7 +37,7 @@ func (h *Handler) Enabled(_ context.Context, l slog.Level) bool {
 
 // Handle implements the slog.Handler interface.
 func (h *Handler) Handle(_ context.Context, r slog.Record) error {
-	c := ansi.NewColorer()
+	c := h.colorOpts.Colorer
 
 	message := new(strings.Builder)
 
@@ -49,7 +48,7 @@ func (h *Handler) Handle(_ context.Context, r slog.Record) error {
 	if h.opts.AddSource {
 		fs := runtime.CallersFrames([]uintptr{r.PC})
 		f, _ := fs.Next()
-		fmt.Fprint(message, " ", "[", f.File, ":", f.Line, "]")
+		fmt.Fprint(message, " ", "[", path.Base(f.File), ":", f.Line, "]")
 	}
 
 	for i := range h.attrs {
