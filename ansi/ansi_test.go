@@ -13,6 +13,7 @@ func TestColorable(t *testing.T) {
 	}
 
 	c := ansi.NewColorer()
+
 	s := c.Color("foo", ansi.Red)
 	if s != "\x1b[31mfoo\x1b[0m" {
 		t.Errorf("expected %q, got %q", "\x1b[31mfoo\x1b[0m", s)
@@ -23,12 +24,14 @@ func TestColorable(t *testing.T) {
 	}
 
 	c = ansi.NewColorer()
+
 	s = c.Color("foo", ansi.Red)
 	if s != "foo" {
 		t.Errorf("expected %q, got %q", "foo", s)
 	}
 
 	c = ansi.NewColorer(ansi.Colorable(func() bool { return false }))
+
 	s = c.Color("foo", ansi.Red)
 	if s != "foo" {
 		t.Errorf("expected %q, got %q", "foo", s)

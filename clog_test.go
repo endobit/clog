@@ -25,6 +25,7 @@ func TestDefaults(t *testing.T) {
 	}
 
 	tm := stripANSI(fields[0])
+
 	_, err := time.Parse(time.Kitchen, tm)
 	if err != nil {
 		t.Fatalf("wrong format for time %q", tm)
@@ -93,10 +94,11 @@ func parseSource(s string) (file string, line int, err error) {
 
 	line, err = strconv.Atoi(fields[1])
 	if err != nil {
-		return "", 0, err
+		return "", 0, fmt.Errorf("cannot parse line number %q: %w", fields[1], err)
 	}
 
 	file = fields[0]
+
 	return
 }
 
@@ -119,6 +121,7 @@ func stripANSI(s string) string {
 			skip = false
 			continue
 		}
+
 		if !skip {
 			stripped += string(c)
 		}
