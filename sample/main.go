@@ -2,34 +2,41 @@
 package main
 
 import (
-	"context"
-	"net"
+	"errors"
 	"os"
+	"time"
 
 	"golang.org/x/exp/slog"
 
 	"github.com/endobit/clog"
 )
 
-func main() {
-	l := slog.LevelVar{}
-	l.Set(slog.LevelDebug)
+var errReset = errors.New("connection reset by peer")
 
-	opts := clog.HandlerOptions{Level: &l, AddSource: true}
+func main() {
+	level := slog.LevelVar{}
+	level.Set(slog.LevelDebug)
+
+	opts := clog.HandlerOptions{Level: &level, AddSource: false}
 
 	log := slog.New(opts.NewHandler(os.Stdout))
 
-	log.Debug("hello world", "name", "Al")
+	// This is directly from the zerolog.ConsoleWriter README
 
-	log.Error("oops", "err", net.ErrClosed, "status", 500)
+	l := log.With(slog.Int("pid", 37556))
+	l.Info("Starting listener", "listen", ":8080")
+	l.Debug("Access", "database", "myapp", "host", "localhost:4932")
 
-	x := log.WithGroup("my stuff")
+	l.Info("Access", "method", "GET", "path", "/users", "resp_time", 23*time.Millisecond)
 
-	x.LogAttrs(context.TODO(), slog.LevelError, "oops",
-		slog.Int("status", 500),
-		slog.Any("err", net.ErrClosed))
+	{
+		l := l.With("method", "POST", "path", "/posts", "resp_time", 532*time.Millisecond)
 
-	y := log.With(slog.Int("foo", 42), slog.String("bar", "foo"))
+		l.Info("Access")
+		l.Warn("Slow request")
+	}
 
-	y.Info("stuff", "count", "lots of it")
+	l.Info("Access", "method", "GET", "path", "/users", "resp_time", 10*time.Millisecond)
+
+	l.Error("Database connection lost", clog.ErrorFieldName, errReset, "database", "myapp")
 }

@@ -39,32 +39,33 @@ func (h *Handler) Enabled(_ context.Context, l slog.Level) bool {
 func (h *Handler) Handle(_ context.Context, r slog.Record) error {
 	c := h.colorOpts.Colorer
 
-	message := new(strings.Builder)
+	msg := new(strings.Builder)
 
-	fmt.Fprint(message, c.Color(r.Time.Format(h.formatOpts.Time), h.colorOpts.Time),
+	fmt.Fprint(msg, c.Color(r.Time.Format(h.formatOpts.Time), h.colorOpts.Time),
 		" ", c.Color(h.formatOpts.levelString(r.Level), h.colorOpts.levelColor(r.Level)),
 		" ", r.Message)
 
 	if h.opts.AddSource {
 		fs := runtime.CallersFrames([]uintptr{r.PC})
 		f, _ := fs.Next()
-		fmt.Fprint(message, " ", "[", path.Base(f.File), ":", f.Line, "]")
+		src := fmt.Sprint("[", path.Base(f.File), ":", f.Line, "]")
+		fmt.Fprint(msg, " ", c.Color(src, h.colorOpts.Source))
 	}
 
 	for i := range h.attrs {
 		key, val := h.attrFmt(r.Level, h.attrs[i])
-		fmt.Fprint(message, " ", key, val)
+		fmt.Fprint(msg, " ", key, val)
 	}
 
 	r.Attrs(func(attr slog.Attr) {
 		key, val := h.attrFmt(r.Level, attr)
-		fmt.Fprint(message, " ", key, val)
+		fmt.Fprint(msg, " ", key, val)
 	})
 
 	h.mutex.Lock()
 	defer h.mutex.Unlock()
 
-	fmt.Fprintln(h.writer, message.String())
+	fmt.Fprintln(h.writer, msg.String())
 
 	return nil
 }
