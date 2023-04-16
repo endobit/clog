@@ -13,6 +13,9 @@ import (
 	"github.com/endobit/clog/ansi"
 )
 
+// ErrorFieldName is the field name used for error fields (zerolog does this).
+var ErrorFieldName = "error"
+
 // HandlerOptions is a set of options for a Handler.
 type HandlerOptions slog.HandlerOptions
 
@@ -24,9 +27,11 @@ type FormatOptions struct {
 
 // ColorOptions is a set of options for colorizing the output of a Handler.
 type ColorOptions struct {
-	Time  ansi.Color
-	Field ansi.Color
-	Level map[slog.Level]ansi.Color
+	Colorer ansi.Colorer
+	Time    ansi.Color
+	Field   ansi.Color
+	Source  ansi.Color
+	Level   map[slog.Level]ansi.Color
 }
 
 var defaultFormatOptions = FormatOptions{
@@ -40,8 +45,10 @@ var defaultFormatOptions = FormatOptions{
 }
 
 var defaultColorOptions = ColorOptions{
-	Time:  ansi.Faint,
-	Field: ansi.Cyan,
+	Colorer: ansi.NewColorer(),
+	Time:    ansi.Faint,
+	Field:   ansi.Faint,
+	Source:  ansi.Faint,
 	Level: map[slog.Level]ansi.Color{
 		slog.LevelDebug: ansi.Yellow,
 		slog.LevelInfo:  ansi.Green,
@@ -83,8 +90,7 @@ func (o HandlerOptions) NewHandler(w io.Writer, opts ...func(*Handler)) slog.Han
 	return &h
 }
 
-// NewHandler returns a Handler the writes to w and invokes any option setting
-// functions.
+// NewHandler returns a Handler with the default options that writes to w.
 func NewHandler(w io.Writer) slog.Handler {
 	return (HandlerOptions{}).NewHandler(w)
 }
@@ -117,12 +123,13 @@ func (h *Handler) attrFmt(level slog.Level, attr slog.Attr) (key, val string) {
 		val = strconv.Quote(val)
 	}
 
-	c := ansi.NewColorer()
+	c := h.colorOpts.Colorer
 
-	key = c.Color(key+"=", h.colorOpts.Field)
-
-	if level >= slog.LevelError && attr.Key == "err" {
+	if level >= slog.LevelError && attr.Key == ErrorFieldName {
+		key = c.Color(key+"=", h.colorOpts.levelColor(level))
 		val = c.Color(val, h.colorOpts.levelColor(level))
+	} else {
+		key = c.Color(key+"=", h.colorOpts.Field)
 	}
 
 	return key, val

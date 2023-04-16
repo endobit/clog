@@ -40,6 +40,10 @@ const (
 )
 
 type (
+	options struct {
+		colorable func() bool
+	}
+
 	// Colorer is an interface for colorizing text.
 	Colorer interface {
 		Color(interface{}, Color) string
@@ -49,13 +53,25 @@ type (
 	nopWrapper   struct{}
 )
 
-// Colorable is a function that returns true if the Colorer should apply ANSI
-// color codes.
-var Colorable = colorable
+// Colorable is an option setting function for NewColorer. It replaces the
+// default function that determines if color is enabled.
+func Colorable(fn func() bool) func(*options) {
+	return func(o *options) {
+		o.colorable = fn
+	}
+}
 
 // NewColorer returns a Colorer based on the Colorable function.
-func NewColorer() Colorer {
-	if Colorable() {
+func NewColorer(opts ...func(*options)) Colorer {
+	o := options{
+		colorable: colorable,
+	}
+
+	for _, opt := range opts {
+		opt(&o)
+	}
+
+	if o.colorable() {
 		return colorWrapper{}
 	}
 
