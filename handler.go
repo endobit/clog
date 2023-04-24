@@ -57,9 +57,11 @@ func (h *Handler) Handle(_ context.Context, r slog.Record) error {
 		fmt.Fprint(msg, " ", key, val)
 	}
 
-	r.Attrs(func(attr slog.Attr) {
+	r.Attrs(func(attr slog.Attr) bool {
 		key, val := h.attrFmt(r.Level, attr)
 		fmt.Fprint(msg, " ", key, val)
+
+		return true
 	})
 
 	h.mutex.Lock()
