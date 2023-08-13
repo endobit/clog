@@ -3,12 +3,11 @@ package clog_test
 import (
 	"bytes"
 	"fmt"
+	"log/slog"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
-
-	"golang.org/x/exp/slog"
 
 	"github.com/endobit/clog"
 	"github.com/endobit/clog/ansi"

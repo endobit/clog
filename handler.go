@@ -4,12 +4,11 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log/slog"
 	"path"
 	"runtime"
 	"strings"
 	"sync"
-
-	"golang.org/x/exp/slog"
 )
 
 // Handler implements an slog.Handler.

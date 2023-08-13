@@ -4,11 +4,10 @@ package clog
 import (
 	"fmt"
 	"io"
+	"log/slog"
 	"strconv"
 	"strings"
 	"time"
-
-	"golang.org/x/exp/slog"
 
 	"github.com/endobit/clog/ansi"
 )

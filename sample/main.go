@@ -3,10 +3,9 @@ package main
 
 import (
 	"errors"
+	"log/slog"
 	"os"
 	"time"
-
-	"golang.org/x/exp/slog"
 
 	"github.com/endobit/clog"
 )
