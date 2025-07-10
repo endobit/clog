@@ -18,6 +18,7 @@ func needsQuoting(s string) bool {
 			if needsQuotingSet[b] {
 				return true
 			}
+
 			i++
 
 			continue
@@ -40,7 +41,7 @@ var needsQuotingSet = [utf8.RuneSelf]bool{
 }
 
 func init() {
-	for i := 0; i < utf8.RuneSelf; i++ {
+	for i := range utf8.RuneSelf {
 		r := rune(i)
 		if unicode.IsSpace(r) || !unicode.IsPrint(r) {
 			needsQuotingSet[i] = true

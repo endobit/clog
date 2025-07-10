@@ -1,3 +1,3 @@
-module github.com/endobit/clog
+module endobit.io/clog
 
-go 1.21
+go 1.22

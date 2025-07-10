@@ -94,5 +94,6 @@ func (n nopWrapper) Color(s interface{}, _ Color) string {
 // [NO_COLOR]: https://no-color.org
 func colorable() bool {
 	_, found := os.LookupEnv("NO_COLOR")
+
 	return !found
 }

@@ -35,29 +35,29 @@ func (h *Handler) Enabled(_ context.Context, l slog.Level) bool {
 }
 
 // Handle implements the slog.Handler interface.
-func (h *Handler) Handle(_ context.Context, r slog.Record) error {
+func (h *Handler) Handle(_ context.Context, rec slog.Record) error { //nolint:gocritic
 	c := h.colorOpts.Colorer
 
 	msg := new(strings.Builder)
 
-	fmt.Fprint(msg, c.Color(r.Time.Format(h.formatOpts.Time), h.colorOpts.Time),
-		" ", c.Color(h.formatOpts.levelString(r.Level), h.colorOpts.levelColor(r.Level)),
-		" ", r.Message)
+	fmt.Fprint(msg, c.Color(rec.Time.Format(h.formatOpts.Time), h.colorOpts.Time),
+		" ", c.Color(h.formatOpts.levelString(rec.Level), h.colorOpts.levelColor(rec.Level)),
+		" ", rec.Message)
 
 	if h.opts.AddSource {
-		fs := runtime.CallersFrames([]uintptr{r.PC})
+		fs := runtime.CallersFrames([]uintptr{rec.PC})
 		f, _ := fs.Next()
 		src := fmt.Sprint("[", path.Base(f.File), ":", f.Line, "]")
 		fmt.Fprint(msg, " ", c.Color(src, h.colorOpts.Source))
 	}
 
 	for i := range h.attrs {
-		key, val := h.attrFmt(r.Level, h.attrs[i])
+		key, val := h.attrFmt(rec.Level, h.attrs[i])
 		fmt.Fprint(msg, " ", key, val)
 	}
 
-	r.Attrs(func(attr slog.Attr) bool {
-		key, val := h.attrFmt(r.Level, attr)
+	rec.Attrs(func(attr slog.Attr) bool {
+		key, val := h.attrFmt(rec.Level, attr)
 		fmt.Fprint(msg, " ", key, val)
 
 		return true

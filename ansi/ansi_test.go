@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/endobit/clog/ansi"
+	"endobit.io/clog/ansi"
 )
 
 func TestColorable(t *testing.T) {
@@ -19,9 +19,7 @@ func TestColorable(t *testing.T) {
 		t.Errorf("expected %q, got %q", "\x1b[31mfoo\x1b[0m", s)
 	}
 
-	if err := os.Setenv("NO_COLOR", "1"); err != nil {
-		t.Fatal(err)
-	}
+	t.Setenv("NO_COLOR", "1")
 
 	c = ansi.NewColorer()
 

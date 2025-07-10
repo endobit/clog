@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/endobit/clog"
+	"endobit.io/clog"
 )
 
 var errReset = errors.New("connection reset by peer")
@@ -23,19 +23,19 @@ func main() {
 	// This is directly from the zerolog.ConsoleWriter README
 
 	l := log.With(slog.Int("pid", 37556))
-	l.Info("Starting listener", "listen", ":8080")
-	l.Debug("Access", "database", "myapp", "host", "localhost:4932")
+	l.Info("starting listener", "listen", ":8080")
+	l.Debug("access", "database", "myapp", "host", "localhost:4932")
 
-	l.Info("Access", "method", "GET", "path", "/users", "resp_time", 23*time.Millisecond)
+	l.Info("access", "method", "GET", "path", "/users", "resp_time", 23*time.Millisecond)
 
 	{
 		l := l.With("method", "POST", "path", "/posts", "resp_time", 532*time.Millisecond)
 
-		l.Info("Access")
-		l.Warn("Slow request")
+		l.Info("access")
+		l.Warn("slow request")
 	}
 
-	l.Info("Access", "method", "GET", "path", "/users", "resp_time", 10*time.Millisecond)
+	l.Info("access", "method", "GET", "path", "/users", "resp_time", 10*time.Millisecond)
 
-	l.Error("Database connection lost", clog.ErrorFieldName, errReset, "database", "myapp")
+	l.Error("database connection lost", clog.ErrorFieldName, errReset, "database", "myapp")
 }

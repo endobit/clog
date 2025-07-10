@@ -2,6 +2,7 @@ package clog_test
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"log/slog"
 	"strconv"
@@ -9,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/endobit/clog"
-	"github.com/endobit/clog/ansi"
+	"endobit.io/clog"
+	"endobit.io/clog/ansi"
 )
 
 func TestDefaults(t *testing.T) {
@@ -88,7 +89,7 @@ func parseSource(s string) (file string, line int, err error) {
 	fields := strings.Fields(source)
 
 	if len(fields) != 2 {
-		return "", 0, fmt.Errorf("wrong number of fields")
+		return "", 0, errors.New("wrong number of fields")
 	}
 
 	line, err = strconv.Atoi(fields[1])
@@ -118,6 +119,7 @@ func stripANSI(s string) string {
 			skip = true
 		case 'm':
 			skip = false
+
 			continue
 		}
 

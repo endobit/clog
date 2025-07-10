@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/endobit/clog/ansi"
+	"endobit.io/clog/ansi"
 )
 
 // ErrorFieldName is the field name used for error fields (zerolog does this).
@@ -134,9 +134,9 @@ func (h *Handler) attrFmt(level slog.Level, attr slog.Attr) (key, val string) {
 	return key, val
 }
 
-func (f FormatOptions) levelString(l slog.Level) string {
-	if level, ok := f.Level[l]; ok {
-		return level // exact match
+func (f FormatOptions) levelString(level slog.Level) string {
+	if l, ok := f.Level[level]; ok {
+		return l // exact match
 	}
 
 	str := func(base, offset slog.Level) string {
@@ -153,14 +153,14 @@ func (f FormatOptions) levelString(l slog.Level) string {
 	}
 
 	switch {
-	case l < slog.LevelInfo:
-		return str(slog.LevelDebug, l-slog.LevelDebug)
-	case l < slog.LevelWarn:
-		return str(slog.LevelInfo, l)
-	case l < slog.LevelError:
-		return str(slog.LevelWarn, l-slog.LevelWarn)
+	case level < slog.LevelInfo:
+		return str(slog.LevelDebug, level-slog.LevelDebug)
+	case level < slog.LevelWarn:
+		return str(slog.LevelInfo, level)
+	case level < slog.LevelError:
+		return str(slog.LevelWarn, level-slog.LevelWarn)
 	default:
-		return str(slog.LevelError, l-slog.LevelError)
+		return str(slog.LevelError, level-slog.LevelError)
 	}
 }
 
