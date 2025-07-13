@@ -72,6 +72,15 @@ func WithFormat(f FormatOptions) func(*Handler) {
 	}
 }
 
+// WithLevel is an option setting function for NewHandler. It adds a level name
+// and color to the Handler. If the level already exists, it is replaced.
+func WithLevel(level slog.Level, name string, color ansi.Color) func(*Handler) {
+	return func(h *Handler) {
+		h.formatOpts.Level[level] = name
+		h.colorOpts.Level[level] = color
+	}
+}
+
 // NewHandler returns a Handler the writes to w and invokes any option setting
 // functions.
 func (o HandlerOptions) NewHandler(w io.Writer, opts ...func(*Handler)) slog.Handler {
