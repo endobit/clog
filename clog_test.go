@@ -109,12 +109,13 @@ func nocolor() clog.ColorOptions {
 }
 
 func stripANSI(s string) string {
-	var stripped string
+	var (
+		str  strings.Builder
+		skip bool
+	)
 
-	skip := false
-
-	for _, c := range s {
-		switch c {
+	for _, r := range s {
+		switch r {
 		case '\x1b':
 			skip = true
 		case 'm':
@@ -124,9 +125,9 @@ func stripANSI(s string) string {
 		}
 
 		if !skip {
-			stripped += string(c)
+			str.WriteRune(r)
 		}
 	}
 
-	return stripped
+	return str.String()
 }
