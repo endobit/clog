@@ -46,7 +46,7 @@ type (
 
 	// Colorer is an interface for colorizing text.
 	Colorer interface {
-		Color(interface{}, Color) string
+		Color(any, Color) string
 	}
 
 	colorWrapper struct{}
@@ -79,13 +79,13 @@ func NewColorer(opts ...func(*options)) Colorer {
 }
 
 // Color implements the Colorer interface for c.
-func (c colorWrapper) Color(s interface{}, color Color) string {
+func (c colorWrapper) Color(s any, color Color) string {
 	return fmt.Sprintf("\x1b[%dm%v\x1b[0m", color, s)
 }
 
 // Color implements the Colorer interface for n. It always returns
 // the raw string with no color applied.
-func (n nopWrapper) Color(s interface{}, _ Color) string {
+func (n nopWrapper) Color(s any, _ Color) string {
 	return fmt.Sprintf("%v", s)
 }
 
